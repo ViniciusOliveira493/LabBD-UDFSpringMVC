@@ -122,7 +122,7 @@ public class ProdutoServlet{
 	}
 	
 	private String msgErro() {
-		return "um erro ocorreu";
+		return " | um erro ocorreu";
 	}
 	
 	private void printData() {

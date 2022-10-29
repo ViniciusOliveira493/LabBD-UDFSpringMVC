@@ -8,6 +8,7 @@ CREATE TABLE tbProduto(
 	, qtdEstoque	INT				NOT NULL
 	PRIMARY KEY(codigo)
 );
+GO
 --========================================= PROCEDURE ==============================
 CREATE PROCEDURE sp_produto(@op CHAR,@cod INT,@nome VARCHAR(30),@valorUnitario DECIMAL(7,2),@qtdEstoque INT, @res VARCHAR(30) OUTPUT)
 AS
@@ -40,10 +41,10 @@ BEGIN
 
 	IF (UPPER(@op) != 'I' AND UPPER(@op) != 'U' AND UPPER(@op) != 'D')
 	BEGIN
-		SET @res = 'operação inválida'
+		SET @res = 'operaï¿½ï¿½o invï¿½lida'
 	END
 END
-
+GO
 --========================================= FUNCTIONS ==============================
 CREATE FUNCTION fn_verificarQtdProdutosAbaixo(@qtdMinima INT) RETURNS int
 AS
@@ -55,9 +56,8 @@ BEGIN
 
 	RETURN @qtd
 END
-
+GO
 --===================
-
 CREATE FUNCTION fn_verificarProdutosAbaixo(@qtdMinima INT) 
 RETURNS @tab TABLE(codigo INT,nome VARCHAR(30),qtd INT)
 AS
@@ -67,5 +67,19 @@ BEGIN
 	WHERE qtdEstoque < @qtdMinima
 	RETURN
 END
-
---===========================================================
+GO
+--======================= TRIGGER ===========================
+CREATE TRIGGER tg_naoEcluirProduto
+ON tbProduto
+AFTER DELETE
+AS
+BEGIN
+	DECLARE @qtd INT;
+	SELECT @qtd = qtdEstoque
+	FROM deleted
+	IF (@qtd > 0)
+	BEGIN
+		ROLLBACK TRANSACTION
+		RAISERROR('Produtos nÃ£o podem ser deletados quando o estoque Ã© maior que 0 ',16,1);
+	END
+END
